@@ -51,7 +51,7 @@ def a_star(start_position, goal_position, matrix):
   def get_neighbors(position, grid_size):
     x, y = position
     row, col = grid_size
-    neighbors = [(x-1, y), (x+1, y), (x, y-1), (x, y+1), (x-1, y-1), (x-1, y+1), (x+1, y-1), (x+1, y+1)]
+    neighbors = [(x-1, y), (x+1, y), (x, y-1),  (x-1, y-1), (x, y+1), (x-1, y+1), (x+1, y-1), (x+1, y+1)]
     valid_neighbors = [(i, j) for i, j in neighbors if 0 <= i < row and 0 <= j < col and matrix[i][j] != 1]
     return valid_neighbors
   
@@ -67,7 +67,7 @@ def a_star(start_position, goal_position, matrix):
     current_node = heapq.heappop(open_list)[1]
     closed_list.append(current_node)
 
-    if current_node == goal_node:
+    if current_node.position == goal_node.position:
       path = []
       while current_node:
         path.append(current_node.position)
@@ -92,58 +92,6 @@ def a_star(start_position, goal_position, matrix):
 
   return None
 
-def catch(seeker, hider, hiders, matrix):
-  temp = a_star(seeker, hider, matrix)
-  found = []
-
-  for t in temp:
-    matrix = calc_heuristic(t[0], t[1], matrix)
-
-    for hider in hiders:
-      if matrix[hider[0]][hider[1]]:
-        found.append(hider)
-
-  return temp, found
-        
-
-def check_move(moves, hiders, matrix):
-  for i, move in enumerate(moves):
-    matrix = calc_heuristic(move[0], move[1], matrix)
-
-    for hider in hiders:
-      if matrix[hider[0]][hider[1]] == 7:
-        temp, found = catch(move, hider, hiders, matrix)
-        hiders.pop(hiders.index(hider))
-        for j in range(i, len(moves)):
-          moves.pop(j)
-        
-        for t in temp:
-          matrix = calc_heuristic(t[0], t[1], matrix)
-
-        m = hider
-        while found:
-          f = found.pop(0)
-          t1, t2 = catch(m, f, hiders, matrix)
-
-          for t in t1:
-            temp.append(t)
-
-          m = f
-
-          for t in t2:
-            matrix = calc_heuristic(t[0], t[1], matrix)
-
-          for t in t2:
-            if t not in found:
-              found.append(t)
-          
-
-        for t in temp:
-          moves.append(t)
-
-
-  return moves
-
 
 
 def move(matrix):
@@ -155,6 +103,7 @@ def move(matrix):
   x, y = vision.find_seeker(matrix)
   hiders = vision.find_hider(matrix)
   n_hiders = len(hiders)
+  is_catched = False
 
 
   unvisited.pop(0)
@@ -168,14 +117,37 @@ def move(matrix):
 
     moves = a_star(current, goal, matrix)
 
-    # for i, move in enumerate(moves):
-    #   matrix = calc_heuristic(move[0], move[1], matrix)
+    for i, move in enumerate(moves):
+      matrix = calc_heuristic(move[0], move[1], matrix)
 
-    #   for hider in hiders:
-    #     if matrix[hider[0]][hider[1]] == 7:
-    #       catch(move, hider, matrix)
+      
 
-    moves = check_move(moves, hiders, matrix)
+      for hider in hiders:
+        if matrix[hider[0]][hider[1]] == 7:
+          print(moves)
+          for j in range(len(moves) - 1, i, -1):
+            moves.pop(j)
+
+          print(moves)
+
+        
+
+          temp = a_star(move, hider, matrix)
+          print(temp)
+          for t in temp:
+            moves.append(t)
+
+          is_catched = True
+          break
+      
+      if is_catched:
+        break
+
+          
+
+          
+
+
 
     for u in range(a):
       for v in range(b):
@@ -184,16 +156,19 @@ def move(matrix):
             unvisited.pop(unvisited.index((u, v)))
             # print((u, v))
 
-    for row in matrix:
-      print(row)
+    # for row in matrix:
+    #   print(row)
 
-    print("\n")
-    print(len(unvisited))
+    # print("\n")
+    # print(len(unvisited))
 
     for move in moves:
       path.append(move)
 
     current = goal
+
+    if is_catched:
+      break
 
 
   print(path)

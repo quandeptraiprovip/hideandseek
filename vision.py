@@ -25,7 +25,7 @@ def find_hider(matrix):
   for i, row in enumerate(matrix):
     for j, element in enumerate(matrix[i]):
       if element == 2:
-        hiders.append([i,j])
+        hiders.append((i,j))
   
   return hiders
         

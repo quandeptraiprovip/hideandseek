@@ -1,40 +1,81 @@
-def hide_cells(map_matrix, seeker_position, vision_range):
-    n = len(map_matrix)
-    m = len(map_matrix[0])
+import vision
+from pos import Pos
+import copy
+import heapq
 
-    def is_valid(x, y):
-        return 0 <= x < n and 0 <= y < m
+def calc_heuristic(x, y, matrix):
+  a, b = vision.find_seeker(matrix)
+  matrix_cop = copy.deepcopy(matrix)
+  matrix_cop[a][b] = 7
+  matrix_cop[x][y] = 3
+  matrix_cop = vision.vision(x, y, matrix_cop)
+  # print(x, y)
 
-    seeker_x, seeker_y = seeker_position
-    hidden_cells = set()
+  # for i in range(len(matrix)):
+  #   print(matrix[i])
+  #   print(matrix_cop[i])
+  #   print("\n")
 
-    for dx in range(-vision_range, vision_range + 1):
-        for dy in range(-vision_range, vision_range + 1):
-            x, y = seeker_x + dx, seeker_y + dy
-            if is_valid(x, y):
-                # Check if the cell is within the vision range
-                if dx ** 2 + dy ** 2 <= vision_range ** 2:
-                    # Check if there's a wall or obstacle blocking the vision
-                    if map_matrix[x][y] == 1:
-                        # Determine the direction of the cell relative to the seeker
-                        direction_x = 1 if x > seeker_x else -1 if x < seeker_x else 0
-                        direction_y = 1 if y > seeker_y else -1 if y < seeker_y else 0
-                        # Check if the blocking wall hides cells in certain directions
-                        if dx * direction_x > 0 or dy * direction_y > 0:
-                            hidden_cells.add((x, y))
+  n = len(matrix)
+  m = len(matrix[0])
+  count = 0
 
-    return hidden_cells
+  for i in range(n):
+    for j in range(m):
+      if matrix_cop[i][j] != matrix[i][j]:
+        count = count + 1
 
-# Example usage:
-map_matrix = [
-    [0, 0, 0, 0, 0],
-    [0, 1, 1, 0, 0],
-    [0, 1, 1, 0, 0],
-    [0, 0, 0, 0, 0],
-]
+  return count, matrix_cop
 
-seeker_position = (1, 2)  # Example seeker position
-vision_range = 2  # Example vision range
+def read_map(file_name):
+    map_data = []
+    obstacles = []
 
-hidden_cells = hide_cells(map_matrix, seeker_position, vision_range)
-print("Hidden cells:", hidden_cells)
+    with open(file_name, 'r') as file:
+      # Read the size of the map
+      n, m = map(int, file.readline().split())
+
+        # Read the map matrix
+      for _ in range(n):
+        map_row = list(map(int, file.readline().split()))
+        map_data.append(map_row)
+
+      # Read the obstacle positions
+      for line in file:
+        obstacle = list(map(int, line.split()))
+        obstacles.append(obstacle)
+
+      for i in range(len(obstacles)):
+        x = obstacles[i][0]
+        y = obstacles[i][1]
+        a = obstacles[i][2]
+        b = obstacles[i][3]
+
+        for i in range(x, a + 1):
+          for j in range(y, b + 1):
+            map_data[i][j] = 1
+
+    return n, m, map_data
+
+_, _, matrix = read_map("map1_1.txt")
+x, y = vision.find_seeker(matrix)
+_ ,matrix = calc_heuristic(x, y, matrix)
+
+cur = Pos(matrix, 0, 0, None)
+next = cur.next_move()
+
+cells = [cur]
+
+for k in range(1):
+  current = heapq.heappop(cells)
+
+  next = current.next_move()
+  # print(current.h)
+
+
+  for moves in next:
+    heapq.heappush(cells, moves)
+
+    
+while cells:
+  print(heapq.heappop(cells))
