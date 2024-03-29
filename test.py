@@ -1,4 +1,2 @@
-a = [1,2,3,4,5]
-b = a.pop(0)
-
-print(b)
+for i in range(3, 2, -1):
+  print(i)

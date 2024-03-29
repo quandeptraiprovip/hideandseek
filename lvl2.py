@@ -1,7 +1,7 @@
 import vision
 import heapq
 import copy
-import draw
+import drawlv2
 from node import Node
 import random
 
@@ -90,12 +90,12 @@ def a_star(start_position, goal_position, matrix):
   return None
 
 def cells_around_announce(center_x, center_y, matrix):
-    cells_around = []
-    for i in range(center_x - 3, center_x + 3 + 1):
-        for j in range(center_y - 3, center_y + 3 + 1):
-            if 0 <= i < len(matrix) and 0 <= j < len(matrix[0]) and matrix[i][j] != 1:
-                cells_around.append((i, j))
-    return cells_around
+  cells_around = []
+  for i in range(center_x - 3, center_x + 3 + 1):
+    for j in range(center_y - 3, center_y + 3 + 1):
+      if 0 <= i < len(matrix) and 0 <= j < len(matrix[0]) and matrix[i][j] != 1:
+        cells_around.append((i, j))
+  return cells_around
 
 def move(matrix):
   unvisited = get_all_cells(matrix)
@@ -106,12 +106,22 @@ def move(matrix):
 
   x, y = vision.find_seeker(matrix)
   hiders = vision.find_hider(matrix)
-  n_hiders = len(hiders)
-  is_catched = False
   n_announce = 1
 
   unvisited.pop(0)
   current = (x, y)
+
+  def get_announce(announce):
+    for i in range(n_hiders):
+
+      random_number1 = random.randint(-3, 3)
+      random_number2 = random.randint(-3, 3)
+
+      while (not (0 <= random_number1 + hiders[i][0] < a and 0 <= random_number2 + hiders[i][1] < b)) or matrix[random_number1 + hiders[i][0]][random_number2 + hiders[i][1]] == 1 or ((random_number1 + hiders[i][0],random_number2 + hiders[i][1]) in hiders):
+        random_number1 = random.randint(-3, 3)
+        random_number2 = random.randint(-3, 3)
+
+      announce.append((random_number1 + hiders[i][0], random_number2 + hiders[i][1]))
 
   while unvisited:
     n_path = len(path)
@@ -122,52 +132,48 @@ def move(matrix):
 
     moves = a_star(current, goal, matrix)
     moves.pop(0)
-    # print(len(moves))
     
     matrix_cop = copy.deepcopy(matrix)
+    # doan nay xu ly khi dang di ma gap announce
     if n_announce > 1:
       for i, move in enumerate(moves):
         if i == 5:
           break
 
         matrix_cop = update_matrix(move[0], move[1], matrix_cop)
-        x_announce = announce[len(announce) - 1][0]
-        y_announce = announce[len(announce) - 1][1]
+        flag = False
 
-        if matrix_cop[x_announce][y_announce] == 7:
+        for location in announce[len(announce) - 3:]:
+
+          if matrix_cop[location[0]][location[1]] == 7:
+
+            matrix = matrix_cop
+            temp = cells_around_announce(location[0], location[1], matrix)
+
+            for t in temp:
+              if t in unvisited:
+                unvisited.pop(unvisited.index(t))
+            
+            unvisited = temp + unvisited
+
+        if flag:
           for j in range(len(moves) - 1, i, -1):
             moves.pop(j)
 
-          matrix = matrix_cop
-          unvisited = []
-          unvisited = cells_around_announce(x_announce, y_announce, matrix)
-
-          for u in range(a):
-            for v in range(b):
-              if matrix[u][v] == 7:
-                if (u, v) in unvisited:
-                  unvisited.pop(unvisited.index((u, v)))
-
-      
     if len(moves) + n_path > 5*n_announce:
       n_step = (len(moves) + n_path) - 5*n_announce
 
       if n_step == 0:
         continue
-
+      
       for i in range(n_step):
-        moves.pop(len(moves) - 1)
+        if moves:
+          moves.pop(len(moves) - 1)
 
       n_announce += 1
-
-      random_number1 = random.randint(-3, 3)
-      random_number2 = random.randint(-3, 3)
-
-      while (not (0 <= random_number1 + hiders[0][0] < a and 0 <= random_number2 + hiders[0][1] < b)) or matrix[random_number1 + hiders[0][0]][random_number2 + hiders[0][1]] == 1 or (random_number1 + hiders[0][0],random_number2 + hiders[0][1]) == hiders[0]:
-        random_number1 = random.randint(-3, 3)
-        random_number2 = random.randint(-3, 3)
-
-      announce.append((random_number1 + hiders[0][0], random_number2 + hiders[0][1]))
+      n_hiders = len(hiders)   
+      
+      get_announce(announce)
 
 
     for i, move in enumerate(moves):
@@ -185,11 +191,9 @@ def move(matrix):
           for t in temp:
             moves.append(t)
 
-          is_catched = True
+          hiders.pop(hiders.index(hider))
           break
       
-      if is_catched:
-        break
 
     temp = []
 
@@ -204,13 +208,13 @@ def move(matrix):
 
     current = path[len(path) - 1]
 
-    if is_catched:
+    if len(hiders) == 0:
       break
 
 
   print(path)
   # print(len(path), len(announce))
-  draw.show("map1_1.txt", path, announce)
+  drawlv2.show("map1_1.txt", path, announce)
 
     
 
@@ -218,9 +222,6 @@ def main():
   file_name = "map1_1.txt"
   n, m, matrix = vision.read_map(file_name)
   move(matrix)
-  # i = calc_heuristic(7, 3, matrix)
-
-  
 
 if __name__ == "__main__":
   main()
