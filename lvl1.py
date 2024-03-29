@@ -3,6 +3,7 @@ import heapq
 import copy
 import draw
 from node import Node
+import random
 
 def calc_heuristic(x, y, matrix):
   a, b = vision.find_seeker(matrix)
@@ -92,48 +93,99 @@ def a_star(start_position, goal_position, matrix):
 
   return None
 
-
+def cells_around_announce(center_x, center_y, matrix):
+    cells_around = []
+    for i in range(center_x - 3, center_x + 3 + 1):
+        for j in range(center_y - 3, center_y + 3 + 1):
+            if 0 <= i < len(matrix) and 0 <= j < len(matrix[0]) and matrix[i][j] != 1:
+                cells_around.append((i, j))
+    return cells_around
 
 def move(matrix):
   unvisited = get_all_cells(matrix)
   n = len(unvisited)
   path = []
+  announce = []
   a, b = (len(matrix), len(matrix[0]))
 
   x, y = vision.find_seeker(matrix)
   hiders = vision.find_hider(matrix)
   n_hiders = len(hiders)
   is_catched = False
-
+  n_announce = 1
 
   unvisited.pop(0)
   current = (x, y)
 
   while unvisited:
+    n_path = len(path)
     goal = unvisited[0]
     unvisited.pop(0)
 
     matrix = calc_heuristic(current[0], current[1], matrix)
 
     moves = a_star(current, goal, matrix)
+    moves.pop(0)
+    # print(len(moves))
+    
+    matrix_cop = copy.deepcopy(matrix)
+    if n_announce > 1:
+      for i, move in enumerate(moves):
+        if i == 5:
+          break
+
+        matrix_cop = calc_heuristic(move[0], move[1], matrix_cop)
+        x_announce = announce[len(announce) - 1][0]
+        y_announce = announce[len(announce) - 1][1]
+
+        if matrix_cop[x_announce][y_announce] == 7:
+          for j in range(len(moves) - 1, i, -1):
+            moves.pop(j)
+
+          matrix = matrix_cop
+          unvisited = []
+          unvisited = cells_around_announce(x_announce, y_announce, matrix)
+
+          # for u in range(a):
+          #   for v in range(b):
+          #     if matrix[u][v] == 7:
+          #       if (u, v) in unvisited:
+          #         unvisited.pop(unvisited.index((u, v)))
+
+      
+    if len(moves) + n_path > 5*n_announce:
+      n_step = (len(moves) + n_path) - 5*n_announce
+
+      if n_step == 0:
+        continue
+
+      for i in range(n_step):
+        moves.pop(len(moves) - 1)
+
+      n_announce += 1
+
+      random_number1 = random.randint(-3, 3)
+      random_number2 = random.randint(-3, 3)
+
+      while (not (0 <= random_number1 + hiders[0][0] < a and 0 <= random_number2 + hiders[0][1] < b)) or matrix[random_number1 + hiders[0][0]][random_number2 + hiders[0][1]] == 1 or (random_number1 + hiders[0][0],random_number2 + hiders[0][1]) == hiders[0]:
+        random_number1 = random.randint(-3, 3)
+        random_number2 = random.randint(-3, 3)
+
+      announce.append((random_number1 + hiders[0][0], random_number2 + hiders[0][1]))
+
 
     for i, move in enumerate(moves):
       matrix = calc_heuristic(move[0], move[1], matrix)
 
-      
-
       for hider in hiders:
         if matrix[hider[0]][hider[1]] == 7:
-          print(moves)
+          # print(moves)
           for j in range(len(moves) - 1, i, -1):
             moves.pop(j)
 
-          print(moves)
-
-        
-
+          # print(moves)
           temp = a_star(move, hider, matrix)
-          print(temp)
+          # print(temp)
           for t in temp:
             moves.append(t)
 
@@ -143,11 +195,7 @@ def move(matrix):
       if is_catched:
         break
 
-          
-
-          
-
-
+    temp = []
 
     for u in range(a):
       for v in range(b):
@@ -165,14 +213,15 @@ def move(matrix):
     for move in moves:
       path.append(move)
 
-    current = goal
+    current = path[len(path) - 1]
 
     if is_catched:
       break
 
 
   print(path)
-  draw.show("map1_1.txt", path)
+  # print(len(path), len(announce))
+  draw.show("map1_1.txt", path, announce)
 
     
 

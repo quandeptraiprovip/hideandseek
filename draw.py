@@ -8,8 +8,9 @@ COLORS = {
     1: (0, 0, 0),        # Wall (black)
     2: (0, 255, 0),      # Hider (green)
     3: (0, 0, 255),       # Seeker (red)
-    7: (255, 255, 255),
-    5: (128, 0, 128)
+    7: (255, 255, 255),  
+    5: (128, 0, 128),    # Obstacles
+    9: (128, 256, 128)     # Announce 
 }
 
 # Function to create matrix graphic
@@ -63,26 +64,43 @@ def read_map(file_name):
 
 # Example input array
 
-def show(filename, moves):
+def show(filename, moves, announces):
 
 # Create matrix graphic
   matrix = read_map(filename)
   x, y = vision.find_seeker(matrix)
   matrix_img = create_matrix_graphic(matrix)
+  flag = False
 
   if matrix_img.shape[0] > 0 and matrix_img.shape[1] > 0:
     cv2.imshow('Matrix Graphic', matrix_img)
     cv2.waitKey(250) 
+    step = 5
+
+  
 
   # Ensure the image is not empty
     for move in moves:
       if matrix_img.shape[0] > 0 and matrix_img.shape[1] > 0:
           # Display the image
+          if step == 0:
+            if flag:
+              matrix[announce[0]][announce[1]] = 0
+
+            announce = announces.pop(0)
+            matrix[announce[0]][announce[1]] = 9
+
+            flag = True
+            if announces:
+              step = 5
+
+              
 
           matrix[x][y] = 0
           matrix[move[0]][move[1]] = 3
           x = move[0]
           y = move[1]
+          step -= 1
 
           matrix_img = create_matrix_graphic(matrix)
           cv2.imshow('Matrix Graphic', matrix_img)
