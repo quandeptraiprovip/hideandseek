@@ -102,8 +102,8 @@ def show(filename, moves, announces):
             announce_locations.append(announce)
             matrix[announce[0]][announce[1]] = 9
 
-          for row in matrix:
-            print(row)
+          # for row in matrix:
+          #   print(row)
 
           flag = True
           if announces:

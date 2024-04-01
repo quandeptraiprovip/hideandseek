@@ -106,13 +106,14 @@ def move(matrix):
 
   x, y = vision.find_seeker(matrix)
   hiders = vision.find_hider(matrix)
+  # print(hiders)
   n_announce = 1
 
   unvisited.pop(0)
   current = (x, y)
 
-  def get_announce(announce):
-    for i in range(n_hiders):
+  def get_announce(announce, n, hiders):
+    for i in range(n):
 
       random_number1 = random.randint(-3, 3)
       random_number2 = random.randint(-3, 3)
@@ -123,10 +124,13 @@ def move(matrix):
 
       announce.append((random_number1 + hiders[i][0], random_number2 + hiders[i][1]))
 
+    print(n)
+
   while unvisited:
     n_path = len(path)
     goal = unvisited[0]
     unvisited.pop(0)
+    catch = []
 
     matrix = update_matrix(current[0], current[1], matrix)
 
@@ -134,6 +138,7 @@ def move(matrix):
     moves.pop(0)
     
     matrix_cop = copy.deepcopy(matrix)
+
     # doan nay xu ly khi dang di ma gap announce
     if n_announce > 1:
       for i, move in enumerate(moves):
@@ -143,7 +148,7 @@ def move(matrix):
         matrix_cop = update_matrix(move[0], move[1], matrix_cop)
         flag = False
 
-        for location in announce[len(announce) - 3:]:
+        for location in announce[len(announce) - len(hiders):]:
 
           if matrix_cop[location[0]][location[1]] == 7:
 
@@ -160,11 +165,11 @@ def move(matrix):
           for j in range(len(moves) - 1, i, -1):
             moves.pop(j)
 
+
     if len(moves) + n_path > 5*n_announce:
+      
       n_step = (len(moves) + n_path) - 5*n_announce
 
-      if n_step == 0:
-        continue
       
       for i in range(n_step):
         if moves:
@@ -173,7 +178,7 @@ def move(matrix):
       n_announce += 1
       n_hiders = len(hiders)   
       
-      get_announce(announce)
+      get_announce(announce, n_hiders, hiders)
 
 
     for i, move in enumerate(moves):
@@ -181,19 +186,36 @@ def move(matrix):
 
       for hider in hiders:
         if matrix[hider[0]][hider[1]] == 7:
+          uncatched = [(hider)]
+
           # print(moves)
           for j in range(len(moves) - 1, i, -1):
             moves.pop(j)
 
-          # print(moves)
-          temp = a_star(move, hider, matrix)
-          # print(temp)
-          for t in temp:
-            moves.append(t)
 
-          hiders.pop(hiders.index(hider))
+          # print(moves)
+          current = move
+          while uncatched:
+            temp = a_star(current, uncatched[0], matrix)
+            # print(temp)
+            for t in temp:
+              matrix = update_matrix(current[0], current[1], matrix)
+              for hide in hiders:
+                if hide not in uncatched and hide not in catch and matrix[hide[0]][hide[1]] == 7:
+                  uncatched.append(hide)
+              moves.append(t)
+              current = t
+            
+              if n_path + len(moves) > 5*n_announce:
+                get_announce(announce, len(hiders), hiders)
+                n_announce += 1
+
+            hiders.pop(hiders.index(uncatched[0]))
+            catch.append(uncatched.pop(0))
+
           break
-      
+
+    
 
     temp = []
 
@@ -207,12 +229,14 @@ def move(matrix):
       path.append(move)
 
     current = path[len(path) - 1]
+    
 
     if len(hiders) == 0:
       break
 
-
+  print("\n")
   print(path)
+  # print(announce)
   # print(len(path), len(announce))
   drawlv2.show("map1_1.txt", path, announce)
 
