@@ -90,7 +90,6 @@ def show(filename, moves, announces):
           n_hider -= 1
 
         if step == 0:
-
           if flag:
             for i in range(len(announce_locations)):
               matrix[announce_locations[i][0]][announce_locations[i][1]] = 0

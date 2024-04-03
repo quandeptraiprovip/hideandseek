@@ -238,13 +238,13 @@ def move(matrix):
   print(path)
   # print(announce)
   # print(len(path), len(announce))
-  drawlv2.show("map1_1.txt", path, announce)
+  drawlv2.show("map1_2.txt", path, announce)
 
     
 
 def main():
-  file_name = "map1_1.txt"
-  n, m, matrix = vision.read_map(file_name)
+  file_name = "map1_2.txt"
+  n, m, matrix, obstacles = vision.read_map(file_name)
   move(matrix)
 
 if __name__ == "__main__":

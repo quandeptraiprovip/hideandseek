@@ -10,7 +10,7 @@ class Node:
         self.f = 0
 
     def __eq__(self, other):
-        return self.position == other.position
+        return self.position[0] == other.position[0] and self.position[1] == other.position[1]
 
     def __lt__(self, other):
         return self.f < other.f

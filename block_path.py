@@ -22,6 +22,30 @@ def read_map(file_name):
 
   return n, m, map_data, obstacles
 
+def get_all_cells(matrix):
+  x, y = vision.find_seeker(matrix)
+  n = len(matrix)
+  m = len(matrix[0])
+  matrix_cop = copy.deepcopy(matrix)
+
+
+  def dfs(i, j, visited):
+    if i < 0 or i >= n or j < 0 or j >= m or matrix_cop[i][j] == 1:
+      return
+    
+    visited.append((i, j))
+    matrix_cop[i][j] = 1
+    
+    dfs(i + 1, j, visited)
+    dfs(i - 1, j, visited)
+    dfs(i, j + 1, visited)
+    dfs(i, j - 1, visited)
+
+  visited = []
+  dfs(x, y, visited)
+
+  return visited
+
 def heuristic(matrix, obstacle = None):
   x, y = vision.find_seeker(matrix)
   n = len(matrix)
@@ -106,16 +130,16 @@ def a_star(matrix, obstacle):
   start_node = Dir(obstacle)
   start_node.f = heuristic(matrix, obstacle)
   base = heuristic(matrix) - obstacle_size
-  print(base)
+  # print(base)
 
   open_list.append(start_node)
 
   while open_list:
     current_node = open_list.pop(0)
     closed_list.append(current_node)
-    print(current_node.f)
+    # print(current_node.f)
 
-    if current_node.f == base:
+    if current_node.f < base:
       path = []
       while current_node.parent:
         path.append(current_node.obstacle)
@@ -140,11 +164,39 @@ def a_star(matrix, obstacle):
       # print(open_list)
   return None        
 
-def main():
-  x, y, matrix, obstacles = read_map("map1_1.txt")
-  print(a_star(matrix, obstacles[1]))
+def main(filename):
+  x, y, matrix, obstacles = read_map(filename)
+  new_obstacle = []
+  for i, obstacle in enumerate(obstacles):
+
+    if a_star(matrix, obstacle):
+      new_obstacle.append((i, a_star(matrix, obstacle)))
+
+  unvisited_before = get_all_cells(matrix)
+  # print(unvisited_before)
+
+  for o in new_obstacle:
+    obstacle = o[1][len(o[1]) - 1]
+    for i in range(obstacle[0], obstacle[2] + 1):
+      for j in range(obstacle[1], obstacle[3] + 1):
+        matrix[i][j] = 1
+
+  unvisited_after = get_all_cells(matrix)
+  # print(unvisited_after)
+
+  new_position = []
+
+  for u in unvisited_before:
+    if u not in unvisited_after and matrix[u[0]][u[1]] != 1:
+      new_position.append(u)
+
+  # print(new_position)
+
   # print(get_neighbors((x,y), obstacles[0], matrix))
   # print(heuristic(matrix, (1, 3, 3, 7)))
+      
+  return new_obstacle, new_position
+  # return new_obstacle
 
 if __name__ == "__main__":
-  main()
+  print(main("map1_1.txt"))

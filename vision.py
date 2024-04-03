@@ -57,7 +57,7 @@ def read_map(file_name):
           for j in range(y, b + 1):
             map_data[i][j] = 1
 
-    return n, m, map_data
+    return n, m, map_data, obstacles
 
 def get_vision(matrix, x, y, a, b):
   arr = [[0,0,0,0],

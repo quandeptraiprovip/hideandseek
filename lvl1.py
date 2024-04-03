@@ -210,13 +210,13 @@ def move(matrix):
 
   print(path)
   # print(len(path), len(announce))
-  draw.show("map1_1.txt", path, announce)
+  draw.show("map1_2.txt", path, announce)
 
     
 
 def main():
-  file_name = "map1_1.txt"
-  n, m, matrix = vision.read_map(file_name)
+  file_name = "map1_2.txt"
+  n, m, matrix, obstacles = vision.read_map(file_name)
   move(matrix)
   # i = calc_heuristic(7, 3, matrix)
 
