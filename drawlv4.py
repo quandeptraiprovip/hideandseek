@@ -131,6 +131,8 @@ def show(filename, moves, announces, obs, new_hiders):
           for i in range(new_obstacle[0], new_obstacle[2] + 1):
             for j in range(new_obstacle[1], new_obstacle[3] + 1):
               matrix[i][j] = 5
+
+          obstacles[obstacle_index] = new_obstacle
           if obs:
             obstacle = obs.pop(0)
             pause = obstacle[1] - n_moves

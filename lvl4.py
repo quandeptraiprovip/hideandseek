@@ -456,6 +456,7 @@ def move(matrix, obstacles):
   # print(announce)
   # print(len(path), len(announce))
   print(new_hiders)
+  print(new_obstacle)
   drawlv4.show("map1_1.txt", path, announce, new_obstacle, new_hiders)
 
     
