@@ -215,8 +215,10 @@ def move(matrix):
 
           break
 
+    
+
     temp = []
-    # loai nhung o da nhin thay ra khoi unvisited
+
     for u in range(a):
       for v in range(b):
         if matrix[u][v] == 7:
@@ -232,16 +234,16 @@ def move(matrix):
     if len(hiders) == 0:
       break
 
-  # print("\n")
-  # print(path)
+  print("\n")
+  print(path)
   # print(announce)
   # print(len(path), len(announce))
-  drawlv2.show("map1_1.txt", path, announce)
+  drawlv2.show("map1_2.txt", path, announce)
 
     
 
 def main():
-  file_name = "map1_1.txt"
+  file_name = "map1_2.txt"
   n, m, matrix, obstacles = vision.read_map(file_name)
   move(matrix)
 

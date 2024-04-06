@@ -11,4 +11,4 @@ class Dir:
     return self.obstacle == other.obstacle
   
   def __lt__(self, other):
-    return self.f > other.f
+    return self.f < other.f

@@ -88,6 +88,7 @@ def show(filename, moves, announces):
         # phan xu ly announce
         if move in hiders:
           n_hider -= 1
+          hiders.pop(hiders.index(move))
 
         if step == 0:
           if flag:
@@ -96,6 +97,7 @@ def show(filename, moves, announces):
 
 
           announce_locations = []
+          print(n_hider)
           for i in range(n_hider):
             announce = announces.pop(0)
             announce_locations.append(announce)

@@ -129,6 +129,7 @@ def heuristic(matrix, obstacle = None):
     a = obstacle[2]
     b = obstacle[3]
 
+    # gia su ta dat obstacle vao map
     for i in range(u, a + 1):
       for j in range(v, b + 1):
         matrix_cop[i][j] = 1
@@ -200,6 +201,7 @@ def a_star_obstacle(matrix, obstacle):
 
   start_node = Dir(obstacle)
   start_node.f = heuristic(matrix, obstacle)
+  # base = heuristic(matrix) - obstacle_size
   base = heuristic(matrix) - obstacle_size
   # print(base)
 
@@ -239,8 +241,9 @@ def a_star_obstacle(matrix, obstacle):
 def move(matrix, obstacles):
   unvisited = get_all_cells(matrix)
   old_unvisited = unvisited.copy()
-  obstacle_nearby = []
   a, b = (len(matrix), len(matrix[0]))
+  obstacle_nearby = []
+  obstacle_visited = []
 
   for i ,obstacle in enumerate(obstacles):
     # print(cells_around_obstacle(obstacle, (a,b)))
@@ -402,12 +405,14 @@ def move(matrix, obstacles):
     # di chuyen obsstacle
     if not unvisited:
       while obstacle_nearby:
+        obstacle_visited.append(obstacle_nearby[0])
         obs = obstacle_nearby.pop(0)
-        # loai obstacle duoc chon ra khoi map
+        # loai obstacle duoc chon de di chuyen ra khoi map
         for i in range(obstacles[obs][0], obstacles[obs][2] + 1):
           for j in range(obstacles[obs][1], obstacles[obs][3] + 1):
             matrix[i][j] = 0
 
+        #tim vi tri moi cho obstacle
         path_obs = a_star_obstacle(matrix, obstacles[obs])
         # print(path_obs)
 
@@ -418,8 +423,8 @@ def move(matrix, obstacles):
             for j in range(new_obs[1], new_obs[3] + 1):
               matrix[i][j] = 1
           
-          for row in matrix:
-            print(row)
+          # for row in matrix:
+          #   print(row)
 
           # tao list unvisited moi
           unvisited = get_all_cells(matrix)
@@ -435,7 +440,7 @@ def move(matrix, obstacles):
             # print(cells_around_obstacle(obstacle, (a,b)))
             for o in cells_around_obstacle(obstacle, (a,b)):
               if o in unvisited:
-                if i not in obstacle_nearby:
+                if i not in obstacle_nearby and i not in obstacle_visited:
                   obstacle_nearby.append(i)
                 break
 

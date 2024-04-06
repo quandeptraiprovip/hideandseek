@@ -87,8 +87,8 @@ def get_vision(matrix, x, y, a, b):
     for i in range(n):
       for j in range(m):
         arr[i][4 - m + j] = matrix[i][j]
-  # a = 3 khi phan x khac voi top right, a = 0 khi giong
-  # b = 1 khi phan y khac voi top right, b = 0 khi giong
+  # a = 3 khi phan x khac voi top right = 0 khi giong
+  # b = 1 khi phan y khac voi top right = 0 khi giong
   p = q = r = s = 0
   if b == 1: 
     p = 3 
@@ -175,7 +175,7 @@ def vision(x, y ,matrix):
 
   if d > m:
     d = m
-
+  
   # top right
   sub = get_vision(get_submatrix(matrix, a, x + 1, y, d), x, y, 0, 0)
   for i in  range(a, x + 1):
@@ -203,125 +203,16 @@ def vision(x, y ,matrix):
     for j in range(y, d):
       if matrix[i][j] != 7:
         matrix[i][j] = sub[i - x][j - y]
+
   return matrix
 
-def get_vision_hider(matrix, x, y, a, b):
-  arr = [[0,0,0],
-         [0,0,0],
-         [0,0,0]]
-  
-  n = len(matrix)
-  m = len(matrix[0])
-  
-  if 2 == matrix[0][0]:
-    for i in range(n):
-      for j in range(m):
-        arr[i][j] = matrix[i][j]
-
-  if 2 == matrix[n - 1][0]:
-    for i in range(n):
-      for j in range(m):
-        arr[3 - n + i][j] = matrix[i][j]
-
-  if 2 == matrix[n - 1][m - 1]:
-    for i in range(n):
-      for j in range(m):
-        arr[3 - n + i][3 - m + j] = matrix[i][j]
-
-  if 2 == matrix[0][m - 1]:
-    for i in range(n):
-      for j in range(m):
-        arr[i][3 - m + j] = matrix[i][j]
-  # a = 2 khi phan x khac voi top right = 0 khi giong
-  # b = 1 khi phan y khac voi top right = 0 khi giong
-  p = q = r = s = 0
-  if b == 1: 
-    p = 2 
-    q = -2
-
-  if arr[abs(a - 2)][1] == 1:
-    arr[abs(a - 2)][2 + q] = 6 if arr[abs(a - 2)][2 + q] != 1 else arr[abs(a - 2)][2 + q]
-    
-    if arr[abs(a - 1)][1] == 1:
-      arr[abs(a - 1)][2 + q] = 6 if arr[abs(a - 1)][2 + q] != 1 else arr[abs(a - 1)][2 + q]
-
-  if arr[abs(a - 1)][1] == 1:
-    arr[abs(a - 0)][2 + q] = 6 if arr[abs(a - 0)][2 + q] != 1 else arr[abs(a - 0)][2 + q]
-
-    if arr[abs(a - 1)][0 + p] == 1:
-      arr[abs(a - 0)][1] = 6 if arr[abs(a - 0)][1] != 1 else arr[abs(a - 0)][1]
-
-  if arr[abs(a - 1)][0 + p] == 1:
-    arr[abs(a - 0)][0 + p] = 6 if arr[abs(a - 0)][0 + p] != 1 else arr[abs(a - 0)][0 + p]
-  
-  for i in range(3):
-    for j in range(3):
-      if(arr[i][j] == 0) or arr[i][j] == 3:
-        arr[i][j] = 7
-      else:
-        if arr[i][j] == 6:
-          arr[i][j] = 0
-
-
-  return arr
-
-
-def vision_hider(x, y ,matrix):
-  n = len(matrix)
-  m = len(matrix[0])
-
-  a = x - 2
-  b = x + 3
-  c = y - 2
-  d = y + 3
-
-  if a < 0:
-    a = 0
-
-  if b > n:
-    b = n
-
-  if c < 0:
-    c = 0
-
-  if d > m:
-    d = m
-  
-  # top right
-  sub = get_vision_hider(get_submatrix(matrix, a, x + 1, y, d), x, y, 0, 0)
-  for i in  range(a, x + 1):
-    for j in range(y, d):
-      if matrix[i][j] != 7:
-        matrix[i][j] = sub[i - (x - 2)][j - y]
-
-  # top left
-  sub = get_vision_hider(get_submatrix(matrix, a, x + 1, c, y + 1), x, y, 0, 1)
-  for i in range(a, x + 1):
-    for j in range(c, y + 1):
-      if matrix[i][j] != 7:
-        matrix[i][j] = sub[i - (x - 2)][j - (y - 2)]
-
-  # bot left
-  sub = get_vision_hider(get_submatrix(matrix, x, b, c, y + 1), x, y, 2, 1)
-  for i in range(x, b):
-    for j in range(c, y + 1):
-      if matrix[i][j] != 7:
-        matrix[i][j] = sub[i - x][j - (y - 2)]
-
-  # bot right
-  sub = get_vision_hider(get_submatrix(matrix, x, b, y, d), x, y, 2, 0)
-  for i in range(x, b):
-    for j in range(y, d):
-      if matrix[i][j] != 7:
-        matrix[i][j] = sub[i - x][j - y]
-  return matrix
 
 
 def main():
   file_name = "map.txt"
-  n, m, matrix = read_map(file_name)
-  hider_list = find_hider(matrix)
-  matrix = vision_hider(hider_list[0][0], hider_list[0][1], matrix)
+  n, m, matrix, obstacles = read_map(file_name)
+  x, y = find_seeker(matrix)
+  matrix = vision(x, y, matrix)
   for row in matrix:
     print(row)
 
