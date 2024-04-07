@@ -173,6 +173,8 @@ def get_valid(matrix, obstacle):
 
   start_node = Dir(obstacle)
   start_node.f = heuristic(matrix, obstacle)
+  if check_valid(matrix, obstacle):
+    return obstacle
   base = heuristic(matrix) - obstacle_size
   # print(base)
 

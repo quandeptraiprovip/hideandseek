@@ -462,12 +462,12 @@ def move(matrix, obstacles):
   # print(len(path), len(announce))
   print(new_hiders)
   print(new_obstacle)
-  drawlv4.show("map3.txt", path, announce, new_obstacle, new_hiders)
+  drawlv4.show("map1_1.txt", path, announce, new_obstacle, new_hiders)
 
     
 
 def main():
-  file_name = "map3.txt"
+  file_name = "map1_1.txt"
   n, m, matrix, obstacles = vision.read_map(file_name)
   hiders = vision.find_hider(matrix)
   # loai het obstacle ra khoi map
