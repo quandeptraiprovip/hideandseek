@@ -162,24 +162,77 @@ def a_star(matrix, obstacle):
         open_list.append(neighbor_node)
 
       # print(open_list)
-  return None        
+  return None   
+
+def get_valid(matrix, obstacle):
+  obstacle_size = (abs(obstacle[0] - obstacle[2]) + 1)*(abs(obstacle[1]-obstacle[3]) + 1)
+  grid_size = (len(matrix), len(matrix[0]))
+  
+  open_list = []
+  closed_list = []
+
+  start_node = Dir(obstacle)
+  start_node.f = heuristic(matrix, obstacle)
+  base = heuristic(matrix) - obstacle_size
+  # print(base)
+
+  open_list.append(start_node)
+
+  while open_list:
+    current_node = open_list.pop(0)
+    closed_list.append(current_node)
+    # print(current_node.f)
+
+
+    if current_node.f < base:
+      path = []
+      while current_node.parent:
+        path.append(current_node.obstacle)
+        current_node = current_node.parent
+      return path[::-1]
+
+    for neighbor_pos in get_neighbors(grid_size, current_node.obstacle, matrix):
+      return neighbor_pos
+    
+      neighbor_node = Dir(neighbor_pos, current_node)
+      if neighbor_node in closed_list:
+        continue
+        
+      neighbor_node.f = heuristic(matrix, neighbor_pos)
+      # print(neighbor_node.h)
+
+      # Update the node's parent if the new path is better
+      for node in open_list:
+        if node == neighbor_node:
+          break
+      else:
+        open_list.append(neighbor_node)
+
+      # print(open_list)
+  return None         
 
 def main(filename):
   x, y, matrix, obstacles = read_map(filename)
   new_obstacle = []
+  print(obstacles)
+  unvisited_before = get_all_cells(matrix)
   for i, obstacle in enumerate(obstacles):
 
     if a_star(matrix, obstacle):
       new_obstacle.append((i, a_star(matrix, obstacle)))
-
-  unvisited_before = get_all_cells(matrix)
+      obstacle = new_obstacle[0][1][len(new_obstacle[0][1]) - 1]
+      for i in range(obstacle[0], obstacle[2] + 1):
+        for j in range(obstacle[1], obstacle[3] + 1):
+          matrix[i][j] = 1
+    else:
+      new_obstacle.append((i, [get_valid(matrix, obstacle)]))
   # print(unvisited_before)
 
-  for o in new_obstacle:
-    obstacle = o[1][len(o[1]) - 1]
-    for i in range(obstacle[0], obstacle[2] + 1):
-      for j in range(obstacle[1], obstacle[3] + 1):
-        matrix[i][j] = 1
+  # for o in new_obstacle:
+  #   obstacle = o[1][len(o[1]) - 1]
+  #   for i in range(obstacle[0], obstacle[2] + 1):
+  #     for j in range(obstacle[1], obstacle[3] + 1):
+  #       matrix[i][j] = 1
 
   unvisited_after = get_all_cells(matrix)
   # print(unvisited_after)
@@ -199,4 +252,4 @@ def main(filename):
   # return new_obstacle
 
 if __name__ == "__main__":
-  print(main("map1_1.txt"))
+  print(main("map3.txt"))
